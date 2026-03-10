@@ -1,9 +1,9 @@
 ---
 name: subagent-orchestration-skill
 description: >
-  Orchestrate complex tasks with built-in quality gates and multi-stage review.
-  Use when the task requires verified spec compliance and code quality before
-  delivery, or when single-pass execution produces unreliable results.
+  Coordinates multi-stage execution with separate specification and code review
+  gates. Activates when complex tasks require independent verification before
+  delivery and single-pass output is likely to be unreliable.
 ---
 # Role: [Task Name] Orchestrator
 

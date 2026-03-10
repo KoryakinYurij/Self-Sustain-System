@@ -1,9 +1,9 @@
 ---
 name: workflow-automation-skill
 description: >
-  Use this skill to [describe the automated workflow]. Activates when the user
-  needs to [trigger conditions]. Provides step-by-step guidance with validation
-  and feedback loops.
+  Automates repeatable multi-step processes with validation checkpoints and
+  feedback loops. Activates when users need structured execution of a recurring
+  workflow and explicit verification at each stage.
 ---
 # Role: [Process Name] Automation Expert
 

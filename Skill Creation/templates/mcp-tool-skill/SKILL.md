@@ -1,9 +1,9 @@
 ---
 name: mcp-tool-skill
 description: >
-  Use this skill to [action] using [MCP tool name]. Activates when the user
-  asks about [specific topics], needs [specific data], or mentions "[trigger words]".
-  Handles [primary workflow] and REST API fallback.
+  Connects user requests to an MCP tool for up-to-date external data retrieval
+  with a documented REST fallback. Activates when users ask for live data,
+  tool-backed lookups, or information tied to specific trigger keywords.
 ---
 # Role: [Tool Name] Specialist
 

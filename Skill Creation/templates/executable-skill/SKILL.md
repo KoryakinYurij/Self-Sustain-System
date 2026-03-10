@@ -1,9 +1,9 @@
 ---
 name: executable-skill
 description: >
-  Template for skills that wrap critical operations in deterministic scripts.
-  Use when building skills that involve deployment, data processing, file
-  operations, PII redaction, or any operation where LLM creativity is a risk.
+  Orchestrates deterministic scripts for critical operations where consistency
+  and safety are mandatory. Activates when tasks involve deployment, destructive
+  changes, sensitive data handling, or other high-risk automation.
 ---
 # Role: [Operation Name] Executor
 

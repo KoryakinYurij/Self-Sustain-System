@@ -1,9 +1,9 @@
 ---
 name: skill-evals
 description: >
-  Create automated test suites to measure and monitor agent skill quality.
-  Use when setting up continuous evaluation, validating skill changes before
-  deployment, or measuring trigger rate and output accuracy.
+  Builds automated evaluation suites to measure skill quality over time.
+  Activates when teams need pre-deploy validation, continuous monitoring,
+  or metric-driven assessment of trigger accuracy and output quality.
 ---
 # Role: Skill Evaluation Framework
 

@@ -1,9 +1,9 @@
 ---
 name: knowledge-domain-skill
 description: >
-  Use this skill for [domain area] expertise. Activates when the user asks about
-  [specific topics], needs guidance on [specific processes], or works with
-  [specific technologies/standards].
+  Provides domain-specific guidance grounded in standards, best practices, and
+  practical decision support. Activates when users request expert help in a
+  defined domain, topic cluster, or specialized process.
 ---
 # Role: [Domain] Expert
 

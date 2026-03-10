@@ -1,6 +1,9 @@
 ---
 name: basic-skill
-description: Minimal template for a basic Agent Skill with just SKILL.md.
+description: >
+  Provides a minimal single-file skill structure with trigger conditions,
+  workflow steps, and verification guidance. Use when creating a lightweight
+  skill that does not require scripts, references, or assets.
 ---
 # Role: [Expert Persona Name]
 
