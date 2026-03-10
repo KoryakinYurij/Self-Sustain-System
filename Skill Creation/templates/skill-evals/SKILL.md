@@ -1,9 +1,9 @@
 ---
 name: skill-evals
 description: >
-  Create automated test suites to measure and monitor agent skill quality.
-  Use when setting up continuous evaluation, validating skill changes before
-  deployment, or measuring trigger rate and output accuracy.
+  Builds automated evaluation suites to measure skill quality over time.
+  Activates when teams need pre-deploy validation, continuous monitoring,
+  or metric-driven assessment of trigger accuracy and output quality.
 ---
 # Role: Skill Evaluation Framework
 
@@ -99,6 +99,23 @@ python scripts/eval_code_grader.py test_output.json
 | False trigger rate | < 10% | 5 irrelevant prompts |
 | Grader pass rate | > 90% | Automated eval runs |
 | Token consumption | Stable ±10% | API logs |
+
+## Anti-rationalization Guardrails
+
+For each critical step, define both:
+1. **Positive instruction** — what must be done
+2. **Negative constraint** — what must never be skipped (even if the task looks trivial)
+
+Use this pattern in workflow steps:
+
+```markdown
+### Step X: [Critical Step Name]
+Run: [exact command or procedure]
+
+**MANDATORY:** Always run this step.
+**DO NOT:** Skip, shortcut, or assume success without evidence.
+If this step fails, fix the issue and re-run before continuing.
+```
 
 ## Red Flags
 

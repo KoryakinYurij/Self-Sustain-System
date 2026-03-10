@@ -1,9 +1,9 @@
 ---
 name: mcp-tool-skill
 description: >
-  Use this skill to [action] using [MCP tool name]. Activates when the user
-  asks about [specific topics], needs [specific data], or mentions "[trigger words]".
-  Handles [primary workflow] and REST API fallback.
+  Connects user requests to an MCP tool for up-to-date external data retrieval
+  with a documented REST fallback. Activates when users ask for live data,
+  tool-backed lookups, or information tied to specific trigger keywords.
 ---
 # Role: [Tool Name] Specialist
 
@@ -71,6 +71,23 @@ curl "https://api.example.com/v2/data?id=result-id&query=specific-query" \
 - **Be specific** with queries for better results
 - **Handle errors gracefully** — if no results, fall back with a disclaimer
 - **Rate limits** — if you get 429 errors, inform the user
+
+## Anti-rationalization Guardrails
+
+For each critical step, define both:
+1. **Positive instruction** — what must be done
+2. **Negative constraint** — what must never be skipped (even if the task looks trivial)
+
+Use this pattern in workflow steps:
+
+```markdown
+### Step X: [Critical Step Name]
+Run: [exact command or procedure]
+
+**MANDATORY:** Always run this step.
+**DO NOT:** Skip, shortcut, or assume success without evidence.
+If this step fails, fix the issue and re-run before continuing.
+```
 
 ## Red Flags
 

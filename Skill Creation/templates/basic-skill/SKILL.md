@@ -1,6 +1,9 @@
 ---
 name: basic-skill
-description: Minimal template for a basic Agent Skill with just SKILL.md.
+description: >
+  Provides a minimal single-file skill structure with trigger conditions,
+  core instructions, and verification guidance. Use when creating a lightweight
+  skill that does not require scripts, references, or assets.
 ---
 # Role: [Expert Persona Name]
 
@@ -31,6 +34,23 @@ Use this skill when the user:
 - [Key guideline 1]
 - [Key guideline 2]
 - [Key guideline 3]
+
+## Anti-rationalization Guardrails
+
+For each critical step, define both:
+1. **Positive instruction** — what must be done
+2. **Negative constraint** — what must never be skipped (even if the task looks trivial)
+
+Use this pattern in workflow steps:
+
+```markdown
+### Step X: [Critical Step Name]
+Run: [exact command or procedure]
+
+**MANDATORY:** Always run this step.
+**DO NOT:** Skip, shortcut, or assume success without evidence.
+If this step fails, fix the issue and re-run before continuing.
+```
 
 ## Red Flags
 

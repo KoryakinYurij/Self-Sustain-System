@@ -1,9 +1,9 @@
 ---
 name: workflow-automation-skill
 description: >
-  Use this skill to [describe the automated workflow]. Activates when the user
-  needs to [trigger conditions]. Provides step-by-step guidance with validation
-  and feedback loops.
+  Automates repeatable multi-step processes with validation checkpoints and
+  feedback loops. Activates when users need structured execution of a recurring
+  workflow and explicit verification at each stage.
 ---
 # Role: [Process Name] Automation Expert
 
@@ -72,6 +72,23 @@ Run: `python scripts/verify.py [output]`
 |-------|-------|----------|
 | [Error 1] | [Common cause] | [How to fix] |
 | [Error 2] | [Common cause] | [How to fix] |
+
+## Anti-rationalization Guardrails
+
+For each critical step, define both:
+1. **Positive instruction** — what must be done
+2. **Negative constraint** — what must never be skipped (even if the task looks trivial)
+
+Use this pattern in workflow steps:
+
+```markdown
+### Step X: [Critical Step Name]
+Run: [exact command or procedure]
+
+**MANDATORY:** Always run this step.
+**DO NOT:** Skip, shortcut, or assume success without evidence.
+If this step fails, fix the issue and re-run before continuing.
+```
 
 ## Red Flags
 

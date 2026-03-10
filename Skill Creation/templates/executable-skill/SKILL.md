@@ -1,9 +1,9 @@
 ---
 name: executable-skill
 description: >
-  Template for skills that wrap critical operations in deterministic scripts.
-  Use when building skills that involve deployment, data processing, file
-  operations, PII redaction, or any operation where LLM creativity is a risk.
+  Orchestrates deterministic scripts for critical operations where consistency
+  and safety are mandatory. Activates when tasks involve deployment, destructive
+  changes, sensitive data handling, or other high-risk automation.
 ---
 # Role: [Operation Name] Executor
 
@@ -61,6 +61,23 @@ Expected output: `{"status": "success", "items_processed": N}`
 | `VALIDATION_FAILED` | Invalid input format | Check input against expected schema |
 | `PERMISSION_DENIED` | Missing credentials | Verify environment variables |
 | `OUTPUT_MISMATCH` | Processing error | Re-run from Step 1 |
+
+## Anti-rationalization Guardrails
+
+For each critical step, define both:
+1. **Positive instruction** — what must be done
+2. **Negative constraint** — what must never be skipped (even if the task looks trivial)
+
+Use this pattern in workflow steps:
+
+```markdown
+### Step X: [Critical Step Name]
+Run: [exact command or procedure]
+
+**MANDATORY:** Always run this step.
+**DO NOT:** Skip, shortcut, or assume success without evidence.
+If this step fails, fix the issue and re-run before continuing.
+```
 
 ## Red Flags
 

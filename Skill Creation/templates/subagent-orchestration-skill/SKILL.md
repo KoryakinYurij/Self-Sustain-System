@@ -1,9 +1,9 @@
 ---
 name: subagent-orchestration-skill
 description: >
-  Orchestrate complex tasks with built-in quality gates and multi-stage review.
-  Use when the task requires verified spec compliance and code quality before
-  delivery, or when single-pass execution produces unreliable results.
+  Coordinates multi-stage execution with separate specification and code review
+  gates. Activates when complex tasks require independent verification before
+  delivery and single-pass output is likely to be unreliable.
 ---
 # Role: [Task Name] Orchestrator
 
@@ -82,6 +82,23 @@ Do NOT re-check spec compliance.
 ```
 
 If issues found → return to Phase 1 with review feedback.
+
+## Anti-rationalization Guardrails
+
+For each critical step, define both:
+1. **Positive instruction** — what must be done
+2. **Negative constraint** — what must never be skipped (even if the task looks trivial)
+
+Use this pattern in workflow steps:
+
+```markdown
+### Step X: [Critical Step Name]
+Run: [exact command or procedure]
+
+**MANDATORY:** Always run this step.
+**DO NOT:** Skip, shortcut, or assume success without evidence.
+If this step fails, fix the issue and re-run before continuing.
+```
 
 ## Red Flags
 
