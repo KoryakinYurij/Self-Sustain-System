@@ -2,7 +2,7 @@
 name: basic-skill
 description: >
   Provides a minimal single-file skill structure with trigger conditions,
-  workflow steps, and verification guidance. Use when creating a lightweight
+  core instructions, and verification guidance. Use when creating a lightweight
   skill that does not require scripts, references, or assets.
 ---
 # Role: [Expert Persona Name]
