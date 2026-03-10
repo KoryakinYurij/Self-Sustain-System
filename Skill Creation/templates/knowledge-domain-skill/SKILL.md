@@ -57,6 +57,23 @@ grep -i "search-term" references/area-2.md
 - **Recommend best practices** over quick fixes
 - **Flag known gotchas** proactively
 
+## Anti-rationalization Guardrails
+
+For each critical step, define both:
+1. **Positive instruction** — what must be done
+2. **Negative constraint** — what must never be skipped (even if the task looks trivial)
+
+Use this pattern in workflow steps:
+
+```markdown
+### Step X: [Critical Step Name]
+Run: [exact command or procedure]
+
+**MANDATORY:** Always run this step.
+**DO NOT:** Skip, shortcut, or assume success without evidence.
+If this step fails, fix the issue and re-run before continuing.
+```
+
 ## Red Flags
 
 STOP and re-evaluate if any of these occur:
