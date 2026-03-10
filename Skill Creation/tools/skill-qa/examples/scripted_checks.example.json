@@ -1,0 +1,7 @@
+[
+  {
+    "name": "python_help",
+    "cmd": "python3 --version",
+    "expect_exit": 0
+  }
+]

@@ -1,0 +1,20 @@
+[
+  {
+    "id": "rel-1",
+    "prompt": "Create a minimal template for a basic agent skill",
+    "relevant": true,
+    "keywords": ["skill", "template", "agent"]
+  },
+  {
+    "id": "rel-2",
+    "prompt": "I need help writing SKILL.md frontmatter",
+    "relevant": true,
+    "keywords": ["skill.md", "frontmatter"]
+  },
+  {
+    "id": "irr-1",
+    "prompt": "Generate a recipe for apple pie",
+    "relevant": false,
+    "keywords": ["skill", "agent"]
+  }
+]

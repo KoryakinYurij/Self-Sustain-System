@@ -1,0 +1,24 @@
+# Skill QA gates and limits
+limits:
+  max_skill_lines: 500
+  max_simple_words: 150
+  max_complex_words: 500
+
+gates:
+  min_trigger_rate: 0.80
+  max_false_trigger_rate: 0.10
+  min_success_delta: 0.00
+  max_token_delta: 300.0
+  min_overlap_tokens: 1
+
+checks:
+  require_third_person_description: true
+  forbid_workflow_steps_in_description: true
+  require_name_matches_directory: true
+
+scripted:
+  # Restrict scripted-check commands to safe prefixes in strict mode.
+  allow_command_prefixes:
+    - "python3"
+    - "uv"
+    - "bash"

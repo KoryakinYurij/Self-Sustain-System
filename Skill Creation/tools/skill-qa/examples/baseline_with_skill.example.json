@@ -1,0 +1,7 @@
+{
+  "results": [
+    {"id": "rel-1", "success": true, "tokens": 360, "tool_calls": 2},
+    {"id": "rel-2", "success": true, "tokens": 260, "tool_calls": 1},
+    {"id": "irr-1", "success": true, "tokens": 170, "tool_calls": 0}
+  ]
+}
