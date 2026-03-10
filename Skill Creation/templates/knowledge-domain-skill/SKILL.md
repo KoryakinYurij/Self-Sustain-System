@@ -82,6 +82,19 @@ STOP and re-evaluate if any of these occur:
 - You're providing guidance without citing specific reference sections
 - You feel an urge to answer from training data instead of checking references
 
+## Circuit Breaker (Anti-Loop)
+
+Prevent infinite search loops:
+
+- **Max Searches:** Do NOT search the same term in the same file more than 2 times
+- **Search Exhaustion:** If no reference contains the answer after checking all relevant files:
+  - STOP searching
+  - Inform user: "This information is not in the skill's knowledge base"
+  - Offer to: expand search scope, check external sources, or update references
+- **No Hallucination:** Do NOT invent answers when references are silent
+
+**Avoid:** grep → no result → grep same file → no result → invent answer
+
 ## Resources
 
 - `references/area-1.md` — [Detailed description]

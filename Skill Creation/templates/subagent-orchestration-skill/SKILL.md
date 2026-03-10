@@ -108,6 +108,63 @@ STOP and re-evaluate if any of these occur:
 - Executor starts ignoring review feedback
 - Reviews become rubber-stamps (always passing)
 
+## Circuit Breaker (Anti-Loop)
+
+Prevent infinite agent round-trips:
+
+- **Max Round-Trips:** Do NOT send back to Executor more than 3 times per phase
+- **Progress Check:** Each return must include DIFFERENT, SPECIFIC feedback (not generic "fix issues")
+- **Escalation:** After 3 round-trips without convergence:
+  1. STOP the workflow
+  2. Write `escalation_report.md` with:
+     - Current state and last output
+     - What keeps failing
+     - Likely root cause (incomplete spec? conflicting requirements?)
+     - Ask user for clarification before continuing
+
+## Context Compression Point
+
+For long-running orchestration, prevent context rot:
+
+- **After each phase completion**, write a `handoff/<phase>-summary.md` containing:
+  - What was accomplished
+  - Key decisions made
+  - Files/changes produced
+  - Next steps
+
+- **Before starting next phase**, CLEAR non-essential context and reload ONLY the summary file
+
+- **Why:** Long workflows cause agents to "forget" early instructions (Goldfish Effect)
+
+## Handoff Protocol
+
+When transferring control between agents, generate `handoff/<ticket-id>.md`:
+
+```markdown
+# Handoff: [Task Name] — [Phase]
+
+## Identity
+You are acting as: [Role: Spec Reviewer / Code Reviewer / Executor]
+
+## Completed Milestones
+- [x] Milestone 1
+- [x] Milestone 2
+
+## Current State
+- Files modified: [list with paths]
+- Last action: [description]
+- Result: [success/fail with details]
+
+## Your First Action
+[Exact instruction for what to do first]
+
+## Constraints
+- Do NOT: [specific restrictions]
+- Must: [specific requirements]
+```
+
+**Every handoff must be a complete context for the receiving agent.**
+
 ## Resources
 
 - `references/spec-template.md` — Template for writing specifications

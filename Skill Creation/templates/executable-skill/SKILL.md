@@ -87,6 +87,20 @@ STOP and re-evaluate if any of these occur:
 - Any step completes suspiciously fast (<1s for complex data)
 - You feel an urge to skip validation or verification
 
+## Circuit Breaker (Anti-Loop)
+
+Prevent infinite retry loops during critical operations:
+
+- **Max Retries:** Do NOT run the same script with the same input more than 3 times
+- **Progress Check:** Each retry must have a DIFFERENT fix applied (different input, different flags, different approach)
+- **Escalation:** After 3 failures, STOP. Write `escalation_report.md` with:
+  - Exact command that failed
+  - Full error output
+  - What you tried to fix it
+  - Ask user for intervention — do NOT continue retrying
+
+**CRITICAL:** Infinite loops in executable skills waste resources and may cause data corruption.
+
 ## Resources
 
 - `scripts/validate.sh` — Input validation (exit 0 = pass, exit 1 = fail)

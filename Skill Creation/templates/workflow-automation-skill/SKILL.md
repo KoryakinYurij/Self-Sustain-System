@@ -98,6 +98,23 @@ STOP and re-evaluate if any of these occur:
 - Any step completes suspiciously fast (<1s for complex operations)
 - You feel an urge to skip a verification step
 
+## Circuit Breaker (Anti-Loop)
+
+Prevent infinite retry loops in automated workflows:
+
+- **Max Retries:** Do NOT retry the same step more than 3 times with identical input
+- **Progress Check:** Each retry must address a DIFFERENT root cause
+- **Feedback Loop Limit:** If returning to a previous step, ensure NEW information is provided
+- **Escalation:** After 3 failures, STOP and write `escalation_report.md`:
+  - Which step failed
+  - All approaches tried
+  - Current state and blockers
+  - Ask user for input before continuing
+
+**Common loop patterns to avoid:**
+- Execute → Verify fails → Execute (same config) → Verify fails → ...
+- Fix A → Test → Fix B (undo A) → Test → Fix A → ...
+
 ## Resources
 
 - `scripts/analyze.py` — [Description]

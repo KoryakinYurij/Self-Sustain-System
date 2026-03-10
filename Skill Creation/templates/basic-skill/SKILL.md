@@ -58,3 +58,15 @@ STOP and re-evaluate if any of these occur:
 - [Warning sign 1 — e.g., output format differs from expected]
 - [Warning sign 2 — e.g., step completes with no output]
 - You feel an urge to skip a verification step
+
+## Circuit Breaker (Anti-Loop)
+
+Prevent infinite retry loops:
+
+- **Max Retries:** Do NOT attempt the same action more than 3 times without a different approach
+- **Progress Check:** If retrying, verify each attempt produces different results
+- **Escalation:** After 3 failed attempts, STOP and write an `escalation_report.md` describing:
+  - What you tried
+  - What failed
+  - What alternatives remain
+  - Ask the user for guidance before continuing

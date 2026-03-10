@@ -125,6 +125,22 @@ STOP and re-evaluate if any of these occur:
 - LLM-as-judge scores diverge significantly from human assessment
 - Evals pass but real-world usage shows failures
 
+## Circuit Breaker (Anti-Loop)
+
+Prevent infinite eval retry loops:
+
+- **Max Eval Runs:** Do NOT re-run the same eval more than 3 times hoping for different results
+- **Flaky Test Detection:** If an eval passes sometimes and fails other times with same input:
+  - Flag as "flaky" in test report
+  - Investigate root cause (non-deterministic output? timing issue?)
+  - Do NOT just re-run until it passes
+- **LLM-as-Judge Consistency:** If judge scores vary >2 points for identical outputs:
+  - The rubric may be too subjective
+  - Refine rubric with more specific criteria
+  - Do NOT average wildly varying scores
+
+**Avoid:** eval fails → tweak output → eval fails → tweak output → ... (without fixing root cause)
+
 ## Resources
 
 - `scripts/eval_code_grader.py` — Deterministic output checker

@@ -286,3 +286,41 @@ STOP and re-evaluate if any of these occur:
 - You feel an urge to skip a verification step
 ```
 
+---
+
+## ❌ 12. Бесконечные циклы (Infinite Loops)
+
+**Проблема:** Агент застревает в цикле — тест падает → сгенерирован фикс → фикс не работает → сгенерирован тот же фикс → ...
+
+**Почему плохо:** LLM не всегда понимают, что делают одно и то же. Они могут:
+- Генерировать идентичные "исправления" каждый раз
+- Сжигать токены без прогресса
+- Застрять в цикле "попытка → ошибка → та же попытка"
+
+### Обязательная секция `## Circuit Breaker (Anti-Loop)`
+
+Добавляйте во все workflow-скиллы:
+
+```markdown
+## Circuit Breaker (Anti-Loop)
+
+Prevent infinite retry loops:
+
+- **Max Retries:** Do NOT attempt the same action more than 3 times without a different approach
+- **Progress Check:** If retrying, verify each attempt produces DIFFERENT results
+- **Escalation:** After 3 failed attempts, STOP and write an `escalation_report.md` describing:
+  - What you tried
+  - What failed
+  - What alternatives remain
+  - Ask the user for guidance before continuing
+```
+
+### Типичные паттерны циклов
+
+| Паттерн цикла | Пример | Как разорвать |
+|---------------|--------|---------------|
+| **Identical retry** | Тест падает → тот же фикс → тест падает | После 2-й попытки: изменить подход |
+| **Oscillation** | Fix A → Fix B (отменяет A) → Fix A → ... | После 2-х переключений: STOP, ask user |
+| **Rubber stamp** | Ревью всегда "проходит" | Добавить реальные проверки в Red Flags |
+
+> Источники: [Anthropic: Circuit Breakers in LLM Agents], [Context Engineering Best Practices 2026]

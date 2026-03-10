@@ -97,6 +97,29 @@ STOP and re-evaluate if any of these occur:
 - API returns errors repeatedly (possible rate limiting or auth issue)
 - Fetched data contradicts your response
 
+## Circuit Breaker (Anti-Loop)
+
+Prevent infinite API/tool retry loops:
+
+- **Max Retries:** Do NOT call the same MCP tool with identical params more than 3 times
+- **Backoff Strategy:** On error, wait before retry (don't hammer the API)
+- **Fallback Chain:** After 2 MCP failures → try REST API fallback → after 2 more failures → inform user
+- **Rate Limit Handling:** If you receive 429 (rate limit):
+  - STOP immediately
+  - Inform user: "Rate limited by API. Please wait before retrying."
+  - Do NOT automatically retry without user confirmation
+
+## Graceful Degradation
+
+If MCP tools and REST API both fail:
+
+1. Inform user: "External data sources are currently unavailable"
+2. Offer alternatives:
+   - Use cached/known information with disclaimer: "Based on training data (may be outdated)"
+   - Suggest manual verification
+   - Offer to retry later
+3. Do NOT hallucinate current data
+
 ## Resources
 
 - `references/api-reference.md` — Full API reference
