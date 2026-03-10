@@ -1,0 +1,46 @@
+name: skill-qa
+
+on:
+  pull_request:
+    paths:
+      - 'Skill Creation/**'
+      - '.github/workflows/skill-qa.yml'
+  push:
+    branches: [ main ]
+    paths:
+      - 'Skill Creation/**'
+      - '.github/workflows/skill-qa.yml'
+  schedule:
+    - cron: '0 4 * * *'
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Unit tests
+        run: python3 -m unittest "Skill Creation/tools/skill-qa/tests/test_run_skill_qa.py"
+
+      - name: Skill QA smoke (phase 2)
+        run: |
+          python3 "Skill Creation/tools/skill-qa/run_skill_qa.py" "Skill Creation/templates/basic-skill" \
+            --scenarios "Skill Creation/tools/skill-qa/examples/scenarios.example.json" \
+            --baseline-without-skill "Skill Creation/tools/skill-qa/examples/baseline_without_skill.example.json" \
+            --baseline-with-skill "Skill Creation/tools/skill-qa/examples/baseline_with_skill.example.json" \
+            --scripted-checks "Skill Creation/tools/skill-qa/examples/scripted_checks.example.json"
+
+      - name: Aggregate trends
+        run: python3 "Skill Creation/tools/skill-qa/aggregate_reports.py"
+
+      - name: Upload QA artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: skill-qa-reports
+          path: Skill Creation/reports/

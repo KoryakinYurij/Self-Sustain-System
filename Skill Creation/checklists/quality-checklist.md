@@ -133,6 +133,10 @@ skills-ref validate path/to/my-skill
 - ✅ Структура директории соответствует спецификации
 
 - [ ] `skills-ref validate` пройден без ошибок
+- [ ] `python3 "Skill Creation/tools/skill-qa/run_skill_qa.py" "path/to/skill"` пройден без ошибок
+- [ ] Phase 2 QA (scenarios + baseline delta + scripted checks) выполнен для production-ready skill
+- [ ] Production/release прогон выполнен с `--strict --require-skills-ref`
+- [ ] Trend-агрегация выполнена: `python3 "Skill Creation/tools/skill-qa/aggregate_reports.py"`
 
 > ⚠️ `skills-ref` — reference-библиотека (demonstration, не production).
 

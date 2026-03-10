@@ -246,6 +246,79 @@ Fix any validation errors before continuing.
 
 ---
 
+## Автоматизированный QA pipeline (phase 2)
+
+Для повторяемого контроля качества используйте локальный CLI:
+
+```bash
+python3 "Skill Creation/tools/skill-qa/run_skill_qa.py" "path/to/skill"
+```
+
+### Что делает phase 2
+
+1. Phase 1 проверки: frontmatter, формат имени, длина `description`, размер `SKILL.md`
+2. Anti-pattern check: workflow-шаги в `description` (WHAT/WHEN vs HOW)
+3. Внешняя проверка через `skills-ref validate` (если установлен)
+4. Scenario-based метрики маршрутизации (`trigger_rate`, `false_trigger_rate`)
+5. Baseline delta (без skill vs со skill): `success_delta`, `token_delta`, `tool_calls_delta`
+6. Scripted checks: запуск команд из JSON-файла и валидация exit code
+7. Отчёты в `Skill Creation/reports/<skill>/<timestamp>/`
+
+### Расширенный запуск (phase 2)
+
+```bash
+python3 "Skill Creation/tools/skill-qa/run_skill_qa.py" "path/to/skill" \
+  --scenarios "Skill Creation/tools/skill-qa/examples/scenarios.example.json" \
+  --baseline-without-skill "Skill Creation/tools/skill-qa/examples/baseline_without_skill.example.json" \
+  --baseline-with-skill "Skill Creation/tools/skill-qa/examples/baseline_with_skill.example.json" \
+  --scripted-checks "Skill Creation/tools/skill-qa/examples/scripted_checks.example.json"
+```
+
+Конфигурация quality gates находится в:
+
+```text
+Skill Creation/tools/skill-qa/config.yaml
+```
+
+Рекомендуемый рабочий цикл:
+
+- Локально: запускать phase 2 перед установкой skill
+- CI: запускать минимум phase 1 на каждый PR, phase 2 на nightly/релиз
+- Аналитика: отслеживать динамику метрик по отчётам в `reports/`
+
+
+
+
+### Phase 3: CI automation + trend aggregation
+
+Добавьте автоматический запуск QA в CI и сбор метрик тренда:
+
+```bash
+python3 "Skill Creation/tools/skill-qa/aggregate_reports.py"
+```
+
+Что даёт phase 3:
+- nightly/PR smoke-прогон через `.github/workflows/skill-qa.yml`;
+- единый CSV с историей метрик (`reports/_meta/metrics.csv`);
+- сводка трендов (`reports/_meta/summary.md`) для релизных решений.
+
+### Hardening-режим (рекомендуется для CI/release)
+
+```bash
+python3 "Skill Creation/tools/skill-qa/run_skill_qa.py" "path/to/skill" \
+  --strict \
+  --require-skills-ref \
+  --simple-workflow
+```
+
+Что даёт hardening:
+- строгая ошибка, если `skills-ref` недоступен;
+- строгая валидация JSON-схем входных файлов phase 2;
+- требование парных baseline-файлов (`without` + `with`);
+- безопасное выполнение scripted checks через allowlist префиксов в `config.yaml`.
+
+---
+
 ## Пример: Полная структура сложного скилла
 
 ```
@@ -374,4 +447,3 @@ Any score < 3 = FAIL
 3. Если fail или score < threshold → блокируй деплой
 4. Логируй результаты для trend-анализа
 ```
-
