@@ -1,0 +1,27 @@
+topics:
+  - id: agent-instruction-patterns
+    target_module: agents-lab
+    priority: high
+    goal: extract strong instruction patterns for agent design
+    source_preferences:
+      - official_docs
+      - engineering_writeups
+      - strong_repositories
+    desired_outputs:
+      - source_entries
+      - review_entries
+      - proposals
+      - experiment_result
+
+  - id: skill-template-quality-signals
+    target_module: skills-lab
+    priority: medium
+    goal: identify patterns that improve skill structure and usefulness
+    source_preferences:
+      - official_docs
+      - good_examples
+      - high-quality repos
+    desired_outputs:
+      - source_entries
+      - review_entries
+      - proposals
