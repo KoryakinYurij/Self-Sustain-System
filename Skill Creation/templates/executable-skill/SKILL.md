@@ -103,6 +103,8 @@ Prevent infinite retry loops during critical operations:
 
 ## Resources
 
+> **Note to Author:** The script paths below are example placeholders. This template shows the expected structure, but does **not** ship with working scripts automatically. You must create the actual scripts for your specific use case.
+
 - `scripts/validate.sh` — Input validation (exit 0 = pass, exit 1 = fail)
 - `scripts/run.py` — Main processing logic (deterministic)
 - `scripts/verify.py` — Output verification (JSON report)

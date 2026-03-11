@@ -19,8 +19,9 @@
 
 ## Качество контента (SKILL.md body)
 
-- [ ] Тело `SKILL.md` — **до 500 строк**
-- [ ] Тело `SKILL.md` — простые workflow **< 150 слов**, сложные **< 500 слов**
+_Важно: Лимит по строкам и лимит по словам применяются **вместе**._
+- [ ] Тело `SKILL.md` — **до 500 строк** (обязательно)
+- [ ] Тело `SKILL.md` — простые workflow **< 150 слов**, сложные **< 500 слов** (обязательно)
 - [ ] Скилл решает **одну задачу** (1 скилл = 1 задача, micro-skills > монолиты)
 - [ ] Нет ссылок `@skills/name` — только текстовые отсылки (например, `Use the deploying-apps skill`)
 - [ ] Тяжёлый контент вынесен в отдельные файлы (`references/`, `assets/`)
@@ -114,7 +115,7 @@
 
 ## Быстрая валидация структуры
 
-**Обязательный шаг перед деплоем** — запустите CLI-валидатор:
+**Рекомендуемый шаг для локальной проверки** — запустите CLI-валидатор от создателей спецификации:
 
 ```bash
 # Клонировать и установить skills-ref (Python)
@@ -132,13 +133,15 @@ skills-ref validate path/to/my-skill
 - ✅ `description` в пределах 1-1024 символов
 - ✅ Структура директории соответствует спецификации
 
-- [ ] `skills-ref validate` пройден без ошибок
+Наш основной инструмент валидации — `run_skill_qa.py`. Проверка через `skills-ref`, хоть и опциональна для быстрой проверки вручную, может жестко требоваться командой при `--strict` релизах: 
+
 - [ ] `python3 "Skill Creation/tools/skill-qa/run_skill_qa.py" "path/to/skill"` пройден без ошибок
+- [ ] `skills-ref validate` пройден без ошибок (рекомендуется для локальной проверки)
 - [ ] Phase 2 QA (scenarios + baseline delta + scripted checks) выполнен для production-ready skill
-- [ ] Production/release прогон выполнен с `--strict --require-skills-ref`
+- [ ] Production/release прогон выполнен с `--strict --require-skills-ref` (если в воркфлоу вашей команды заложено строгое требование skills-ref)
 - [ ] Trend-агрегация выполнена: `python3 "Skill Creation/tools/skill-qa/aggregate_reports.py"`
 
-> ⚠️ `skills-ref` — reference-библиотека (demonstration, не production).
+> ⚠️ `skills-ref` — reference-библиотека (demonstration, не production), наша архитектура полагается на `run_skill_qa.py`.
 
 > Источник: [agentskills.io/specification — Validation](https://agentskills.io/specification#validation)
 

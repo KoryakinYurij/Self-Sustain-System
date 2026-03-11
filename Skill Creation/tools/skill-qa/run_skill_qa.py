@@ -17,6 +17,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+import yaml
 
 NAME_RE = re.compile(r"^[a-z0-9][a-z0-9-]{0,63}$")
 WORKFLOW_HINTS_RE = re.compile(r'\b(step\s*\d+|first|then|after that|workflow|run\s+[`"]?\w)', re.IGNORECASE)
@@ -32,44 +33,15 @@ class CheckResult:
 
 
 def parse_simple_yaml(path: Path) -> dict[str, Any]:
-    """Parse a minimal YAML subset (sections + key: value)."""
-    result: dict[str, Any] = {}
-    current_section: dict[str, Any] | None = None
-
-    for raw_line in path.read_text(encoding="utf-8").splitlines():
-        line = raw_line.rstrip()
-        stripped = line.strip()
-        if not stripped or stripped.startswith("#"):
-            continue
-
-        if line == stripped and stripped.endswith(":"):
-            section_name = stripped[:-1].strip()
-            result[section_name] = {}
-            current_section = result[section_name]
-            continue
-
-        if ":" not in stripped:
-            continue
-
-        key, value = stripped.split(":", 1)
-        key = key.strip()
-        value = value.strip()
-
-        parsed: Any
-        if value.lower() in {"true", "false"}:
-            parsed = value.lower() == "true"
-        else:
-            try:
-                parsed = float(value) if "." in value else int(value)
-            except ValueError:
-                parsed = value.strip('"').strip("'")
-
-        if current_section is not None and raw_line.startswith((" ", "\t")):
-            current_section[key] = parsed
-        else:
-            result[key] = parsed
-
-    return result
+    """Parse YAML configuration using PyYAML."""
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            data = yaml.safe_load(f)
+        return data if isinstance(data, dict) else {}
+    except yaml.YAMLError as exc:
+        raise ValueError(f"Failed to parse config {path}: {exc}") from exc
+    except FileNotFoundError:
+        return {}
 
 
 def parse_skill_md(skill_md: Path) -> tuple[dict[str, Any], str, str | None]:
@@ -87,12 +59,13 @@ def parse_skill_md(skill_md: Path) -> tuple[dict[str, Any], str, str | None]:
     if end_idx is None:
         return {}, text, "Missing YAML frontmatter closing delimiter '---'"
 
-    frontmatter: dict[str, Any] = {}
-    for line in lines[1:end_idx]:
-        if ":" not in line:
-            continue
-        key, value = line.split(":", 1)
-        frontmatter[key.strip()] = value.strip().strip('"').strip("'")
+    frontmatter_text = "\n".join(lines[1:end_idx])
+    try:
+        frontmatter = yaml.safe_load(frontmatter_text)
+        if not isinstance(frontmatter, dict):
+            frontmatter = {}
+    except yaml.YAMLError as exc:
+        return {}, text, f"Invalid YAML frontmatter: {exc}"
 
     body = "\n".join(lines[end_idx + 1 :])
     return frontmatter, body, None
@@ -549,7 +522,11 @@ def main() -> int:
     parser.add_argument("--script-max-output-chars", type=int, default=200, help="Max scripted command output chars in report")
     args = parser.parse_args()
 
-    config = parse_simple_yaml(args.config)
+    try:
+        config = parse_simple_yaml(args.config)
+    except ValueError as exc:
+        print(f"Skill QA Fatal Error: {exc}")
+        return 1
     checks, metrics = evaluate(
         skill_dir=args.skill_dir.resolve(),
         config=config,
