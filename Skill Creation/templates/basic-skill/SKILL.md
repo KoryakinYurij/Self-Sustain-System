@@ -41,16 +41,14 @@ For each critical step, define both:
 1. **Positive instruction** — what must be done
 2. **Negative constraint** — what must never be skipped (even if the task looks trivial)
 
-Use this pattern in workflow steps:
+Use this pattern in workflow steps. For example, a validation step might look like this:
 
-```markdown
-### Step X: [Critical Step Name]
-Run: [exact command or procedure]
+### Step 1: Validate Configuration
+Run: `python scripts/validate_config.py --env prod`
 
-**MANDATORY:** Always run this step.
-**DO NOT:** Skip, shortcut, or assume success without evidence.
-If this step fails, fix the issue and re-run before continuing.
-```
+**MANDATORY:** Always run this validation step and read its output.
+**DO NOT:** Skip this step, even if the user claims the config is correct.
+If validation fails, explicitly ask the user to provide the correct values before retrying.
 
 ## Red Flags
 

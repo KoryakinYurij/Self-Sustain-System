@@ -82,9 +82,12 @@ name: pdf--processing   # двойные дефисы запрещены
 
 #### Примеры description
 
+> **Важно:** Для многострочных значений в YAML используйте `>` (сохраняет переносы как пробелы) или `|` (сохраняет переносы строк).
+
 ```yaml
 # ✅ Хороший — конкретный, с триггерами
-description: Extract text and tables from PDF files, fill forms, merge documents.
+description: >
+  Extract text and tables from PDF files, fill forms, merge documents.
   Use when working with PDF documents or when the user mentions PDFs, forms, or
   document extraction.
 
@@ -133,9 +136,9 @@ name: pdf-helper           # слишком общее
 - Корректно обрабатывать граничные случаи
 
 ### `references/`
-Статическая документация, на которую ссылается `SKILL.md`:
-- `REFERENCE.md` — детальный технический справочник
-- `FORMS.md` — шаблоны форм или структурированных данных
+Статическая документация, на которую ссылается `SKILL.md`. Имена файлов ниже — это только возможные примеры, а не строгий стандарт:
+- `REFERENCE.md` — пример детального технического справочника
+- `FORMS.md` — пример шаблонов форм или структурированных данных
 - Доменные файлы (`finance.md`, `legal.md` и т.д.)
 
 ### `assets/`
