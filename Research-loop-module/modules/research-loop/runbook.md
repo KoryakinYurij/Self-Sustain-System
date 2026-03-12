@@ -2,7 +2,7 @@
 
 ## Цель runbook
 
-Этот документ нужен, чтобы человек или агент мог быстро запустить один цикл research-loop без долгого размышления о процессе.
+Этот документ нужен, чтобы человек или агент мог быстро запустить один cycle в `campaigns/` без долгой навигации по модулю.
 
 ## Минимальный запуск
 
@@ -12,33 +12,47 @@
 - 1 целевой модуль (`agents-lab` или `skills-lab`)
 - 1 маленький тест
 
-### Выход (Full mode)
-- 3–5 source entries
-- 3–5 review entries
-- 1–3 proposal entries
-- 1 experiment entry
+### Выход (campaign mode)
+- 1 папка `campaigns/<date-topic>/`
+- `plan.md`
+- `sources.md`
+- `reviews.md`
+- `proposal.md`
+- `experiment.md`
+- `decision.md`
+- `artifacts/` (по необходимости)
 - при успехе — 1 запись в memory + обновлённый шаблон
 - при неудаче — 1 запись в anti-patterns
 
-### Выход (Lightweight mode)
-- 1 research-digest.md
-- при необходимости — переход в full mode
-
 ## Рекомендуемая последовательность
 
-1. взять тему из `inbox/`
-2. определить режим: lightweight или full
-3. завести source entries (или digest)
-4. сделать review entries
-5. из review сделать proposal
-6. выбрать один proposal для эксперимента
-7. провести тест (с baseline!)
-8. записать результат
-9. promote / reject / defer (см. `pattern-promotion-policy.md`)
+1. выбрать тему (из `inbox/` или вручную);
+2. создать campaign-папку и заполнить `plan.md`;
+3. собрать источники в `sources.md`;
+4. сделать `reviews.md`;
+5. собрать конкретный `proposal.md`;
+6. провести тест и записать `experiment.md` (с baseline);
+7. закрыть run через `decision.md`;
+8. выполнить promote / reject / defer (см. `pattern-promotion-policy.md`);
+9. проверить campaign-структуру, frontmatter и семантические lifecycle-правила через validator.
+
+
+## Legacy rule
+
+`sources/`, `reviews/`, `proposals/`, `experiments/` — только для миграции старых материалов.
+Новые циклы создаются только через `campaigns/<date-topic>/`.
+
+## Команда валидации
+
+```bash
+python modules/research-loop/scripts/validate_campaign.py modules/research-loop/campaigns
+```
+
+Дополнительно ориентироваться на `campaigns/frontmatter-schema.md`.
 
 ## Важное правило
 
-Если исследование интересное, но не привело к наблюдаемому улучшению, его всё равно можно сохранить как:
+Если исследование интересное, но не привело к наблюдаемому улучшению, его можно сохранить как:
 - полезный контекст;
 - отложенное направление;
 - неподтверждённую гипотезу.
