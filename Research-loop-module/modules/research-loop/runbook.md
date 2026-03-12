@@ -34,7 +34,13 @@
 6. провести тест и записать `experiment.md` (с baseline);
 7. закрыть run через `decision.md`;
 8. выполнить promote / reject / defer (см. `pattern-promotion-policy.md`);
-9. проверить campaign-структуру и frontmatter через validator.
+9. проверить campaign-структуру, frontmatter и семантические lifecycle-правила через validator.
+
+
+## Legacy rule
+
+`sources/`, `reviews/`, `proposals/`, `experiments/` — только для миграции старых материалов.
+Новые циклы создаются только через `campaigns/<date-topic>/`.
 
 ## Команда валидации
 

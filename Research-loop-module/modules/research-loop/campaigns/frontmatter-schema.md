@@ -1,14 +1,28 @@
-# Campaign Frontmatter Schema (MVP)
+# Campaign Frontmatter Schema (MVP+)
 
-Документ фиксирует минимальные machine-readable поля для campaign mode.
+Документ фиксирует machine-readable контракт для campaign mode.
+
+## Ограничение формата frontmatter
+
+Для совместимости с текущим валидатором допускаются только **простые scalar-поля** вида:
+
+`key: value`
+
+Не допускаются списки, вложенные структуры и многострочные значения. Если нужны сложные структуры — требуется migration валидатора на полноценный YAML parser.
 
 ## Общие правила
 
 - Все campaign-файлы (`plan.md`, `sources.md`, `reviews.md`, `proposal.md`, `experiment.md`, `decision.md`) должны начинаться с YAML frontmatter.
-- Минимально обязательные поля для каждого файла:
+- Обязательные глобальные поля:
   - `id`
   - `status`
-- Для `decision.md` дополнительно обязательно поле `outcome`.
+  - `target_module`
+  - `updated_at` (дата `YYYY-MM-DD`)
+- Для `plan.md` дополнительно обязательно `created_at`.
+- Для `decision.md` дополнительно обязательны:
+  - `outcome`
+  - `proposal_ref`
+  - `experiment_ref`
 
 ## Enumerations
 
@@ -30,6 +44,14 @@
 ### `decision.md`
 - `status`: `open` | `closed`
 - `outcome`: `pending` | `accepted` | `rejected` | `inconclusive` | `needs-more-testing`
+
+## Semantic rules
+
+- Если `decision.status = closed`, то `decision.outcome` не может быть `pending`.
+- Если `decision.outcome = accepted`, поле `promotion_ref` обязательно и не может быть пустым.
+- Если `decision.outcome = rejected`, поле `rejection_ref` обязательно и не может быть пустым.
+- Если run закрыт (`decision.status = closed`), в `experiment.md` baseline не может быть `TBD`.
+- Если run закрыт (`decision.status = closed`), в `sources.md` должно быть минимум 3 source entry.
 
 ## Naming convention
 

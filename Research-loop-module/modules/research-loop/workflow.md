@@ -6,7 +6,7 @@
 - каждый run создаётся в `campaigns/<date-topic>/`;
 - внутри run хранится полный трейс одного цикла.
 
-Legacy-папки (`sources/`, `reviews/`, `proposals/`, `experiments/`) сохраняются для обратной совместимости и миграции старых материалов.
+Legacy-папки (`sources/`, `reviews/`, `proposals/`, `experiments/`) сохраняются только для миграции старых материалов; новые активные run-ы создаются исключительно в `campaigns/`.
 
 ---
 
@@ -79,7 +79,7 @@ python modules/research-loop/scripts/validate_campaign.py modules/research-loop/
 - [ ] есть experiment с зафиксированным baseline;
 - [ ] есть финальный статус в `decision.md`;
 - [ ] принято решение: promote / reject / defer;
-- [ ] run проходит автоматическую валидацию структуры/frontmatter.
+- [ ] run проходит автоматическую валидацию структуры/frontmatter и семантических правил lifecycle.
 
 Без этих пунктов run не должен считаться закрытым.
 

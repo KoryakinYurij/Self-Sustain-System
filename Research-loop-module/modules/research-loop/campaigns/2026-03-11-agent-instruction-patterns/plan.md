@@ -4,6 +4,7 @@ status: in_progress
 owner: research-loop
 target_module: agents-lab
 created_at: 2026-03-11
+updated_at: 2026-03-11
 ---
 
 # Plan — agent-instruction-patterns

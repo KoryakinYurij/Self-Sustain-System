@@ -22,7 +22,12 @@ campaigns/
 - все файлы run лежат рядом;
 - run закрывается только через `decision.md`;
 - accepted/rejected выводы должны быть продвинуты по `pattern-promotion-policy.md`;
-- frontmatter должен соответствовать `frontmatter-schema.md`.
+- frontmatter должен соответствовать `frontmatter-schema.md`;
+- новые run создаются **только** в `campaigns/`.
+
+## Legacy mode
+
+Папки `sources/`, `reviews/`, `proposals/`, `experiments/` считаются legacy и используются только для миграции старых материалов (read-only режим для новых циклов).
 
 ## Validation
 

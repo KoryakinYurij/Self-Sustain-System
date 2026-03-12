@@ -26,14 +26,14 @@
 ### Горизонтальный слой (legacy + вспомогательный)
 
 - `inbox/` — входящие темы (до старта campaign);
-- `sources/`, `reviews/`, `proposals/`, `experiments/` — legacy-структура для миграции старых материалов;
+- `sources/`, `reviews/`, `proposals/`, `experiments/` — legacy-структура только для миграции старых материалов (read-only для новых run);
 - `templates/` — шаблоны записей;
 - `config/` — пример конфигурации направлений исследования.
 
 ## Операционные контракты
 
 - структура campaign и machine-readable поля описаны в `campaigns/frontmatter-schema.md`;
-- автоматическая проверка run выполняется через `scripts/validate_campaign.py`.
+- автоматическая проверка run выполняется через `scripts/validate_campaign.py` (структура + семантика жизненного цикла).
 
 ## Первый режим работы
 
