@@ -4,7 +4,9 @@
 
 ## Когда применяется
 
-После того как experiment получил статус `accepted`.
+После того как experiment внутри campaign получил статус `accepted`.
+
+Рекомендуемый источник: `modules/research-loop/campaigns/<date-topic>/decision.md` + `experiment.md`.
 
 ## Шаги продвижения (promotion)
 
@@ -22,8 +24,8 @@
 В записи `accepted-patterns.md` отметить:
 - `Статус синхронизации: [x] обновлено`
 
-### 4. Закрыть experiment
-В experiment entry добавить пометку, что promotion выполнен.
+### 4. Закрыть campaign
+В `decision.md` и/или `experiment.md` добавить пометку, что promotion выполнен.
 
 ## Шаги отклонения (rejection)
 
@@ -34,11 +36,11 @@
 ### 2. Откатить изменения (если были)
 Если proposal уже был внедрён до получения финального статуса — откатить к baseline.
 
-### 3. Закрыть experiment
-В experiment entry зафиксировать `rejected` и причину.
+### 3. Закрыть campaign
+В `decision.md` зафиксировать `rejected` и причину.
 
 ## Важно
 
 - Promotion без обновления шаблона = незавершённый promotion.
 - Rejection без записи в anti-patterns = потерянный опыт.
-- Оба варианта должны заканчиваться закрытием experiment entry.
+- Оба варианта должны заканчиваться закрытием campaign.

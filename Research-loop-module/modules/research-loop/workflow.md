@@ -1,5 +1,15 @@
 # Research Loop Workflow
 
+## Режим хранения результатов
+
+Основной режим — **campaign-first**:
+- каждый run создаётся в `campaigns/<date-topic>/`;
+- внутри run хранится полный трейс одного цикла.
+
+Legacy-папки (`sources/`, `reviews/`, `proposals/`, `experiments/`) сохраняются для обратной совместимости и миграции старых материалов.
+
+---
+
 ## Source Trust Tiers
 
 При сборе источников каждый из них должен быть отмечен уровнем доверия:
@@ -15,82 +25,63 @@
 
 ---
 
-## Два режима работы
-
-### Full mode (по умолчанию)
-Полный цикл: source-entry → review-entry → proposal-entry → experiment-entry.
-Используется для серьёзных изменений, затрагивающих шаблоны, архитектуру или рабочие контракты.
-
-### Lightweight mode
-Один файл `research-digest.md` для маленьких исследований.
-Используется, когда мысль небольшая и не требует разведения по 4–5 отдельным файлам.
-Шаблон: `templates/research-digest.md`
-
-Если lightweight-исследование перерастает в серьёзный proposal — переключиться на full mode.
-
----
-
-## Базовый цикл (Full mode)
+## Базовый цикл (campaign mode)
 
 ### Шаг 1. Выбрать тему
-Тема должна быть узкой и понятной.
-
-Примеры:
-- agent-instruction-patterns
-- tool-routing-patterns
-- skill-template-quality-signals
-- evaluation-checklist-design
+Создать папку `campaigns/<YYYY-MM-DD-topic>/` и заполнить `plan.md`.
 
 ### Шаг 2. Собрать источники
-Найти 3–5 качественных источников по теме.
-Каждому источнику присвоить Trust Tier (T1–T4).
+Заполнить `sources.md` (3–5 качественных источников, каждому присвоить Trust Tier).
 
-### Шаг 3. Сделать review по каждому источнику
-Ответить кратко:
+### Шаг 3. Сделать review
+Заполнить `reviews.md`:
 - почему источник заслуживает внимания;
-- что именно в нём полезно;
-- что из него нельзя переносить бездумно;
+- что именно полезно;
+- что нельзя переносить бездумно;
 - к какому модулю относится потенциальная польза.
 
 ### Шаг 4. Сформировать proposal
-Proposal должен быть конкретным.
-Не «улучшить агента», а, например:
-- ввести новый шаблон agent instructions;
-- добавить обязательный раздел tool selection;
-- изменить порядок reasoning/acting;
-- усилить критерии проверки skill quality.
+В `proposal.md` зафиксировать конкретное изменение.
 
-### Шаг 5. Провести маленький experiment
-Проверить proposal на одном узком кейсе.
-Эксперимент должен быть маленьким и наблюдаемым.
+### Шаг 5. Провести experiment
+В `experiment.md` обязательно зафиксировать Baseline и 2–3 инвариантных кейса.
 
-**Обязательно:** зафиксировать Baseline (поведение до изменения) и проверить 2–3 инвариантных кейса (не должны ухудшиться).
-
-### Шаг 6. Зафиксировать outcome
-Варианты:
+### Шаг 6. Принять решение
+В `decision.md` зафиксировать outcome:
 - accepted
 - rejected
 - inconclusive
 - needs-more-testing
 
-### Шаг 7. Promote или reject
-- Если accepted → перенести паттерн в `memory/accepted-patterns.md` и обновить связанный шаблон (см. `pattern-promotion-policy.md`).
-- Если rejected → перенести в `memory/anti-patterns.md` с причиной отказа.
-- Если inconclusive/needs-more-testing → оставить в `experiments/` с пометкой для повторного прогона.
+### Шаг 7. Promote / reject / defer
+- accepted → в `memory/accepted-patterns.md` + обновление целевого шаблона;
+- rejected → в `memory/anti-patterns.md`;
+- inconclusive/needs-more-testing → оставить в campaign с планом next run.
+
+### Шаг 8. Провести структурную валидацию
+Проверить run скриптом:
+
+```bash
+python modules/research-loop/scripts/validate_campaign.py modules/research-loop/campaigns
+```
+
+И убедиться, что frontmatter соответствует `campaigns/frontmatter-schema.md`.
 
 ---
 
-## Definition of Done (одного цикла research-loop)
+## Definition of Done (одного campaign run)
 
 Цикл считается **завершённым**, когда:
 
-- [ ] есть минимум 3 источника с присвоенными Trust Tiers;
-- [ ] есть минимум 1 конкретный proposal;
-- [ ] есть 1 experiment с зафиксированным baseline;
-- [ ] есть финальный статус: accepted / rejected / inconclusive;
-- [ ] принято решение: **promote** (→ memory + template update) / **reject** (→ anti-patterns) / **defer** (→ оставить с пометкой).
+- [ ] есть заполненный `plan.md`;
+- [ ] есть минимум 3 источника с Trust Tier в `sources.md`;
+- [ ] есть конкретный proposal;
+- [ ] есть experiment с зафиксированным baseline;
+- [ ] есть финальный статус в `decision.md`;
+- [ ] принято решение: promote / reject / defer;
+- [ ] run проходит автоматическую валидацию структуры/frontmatter.
 
-Без этих пунктов цикл не должен считаться закрытым. Это защита от зависания в бесконечном research.
+Без этих пунктов run не должен считаться закрытым.
 
 ---
 
@@ -99,8 +90,6 @@ Proposal должен быть конкретным.
 Если внедрённый proposal сломал поведение или дал негативный эффект:
 
 1. **Откатить** изменение к состоянию до эксперимента.
-2. **Записать** причину отката в experiment entry (поле Notes).
-3. **Перенести** паттерн в `memory/anti-patterns.md` с пометкой "rolled back".
-4. **Не удалять** experiment entry — он остаётся как документация неудачной попытки.
-
-Система должна уметь не только улучшать, но и безопасно отступать.
+2. **Записать** причину отката в `experiment.md`.
+3. **Перенести** паттерн в `memory/anti-patterns.md` с пометкой `rolled back`.
+4. **Не удалять** campaign — он остаётся как документация неудачной попытки.
