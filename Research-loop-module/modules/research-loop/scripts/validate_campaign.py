@@ -3,12 +3,15 @@
 
 Usage:
   python scripts/validate_campaign.py modules/research-loop/campaigns
+  python scripts/validate_campaign.py modules/research-loop/campaigns --check-urls
 """
 
 from __future__ import annotations
 
 import re
 import sys
+import urllib.request
+import urllib.error
 from pathlib import Path
 
 REQUIRED_FILES = [
@@ -52,6 +55,9 @@ DATE_TOPIC = re.compile(r"^\d{4}-\d{2}-\d{2}-[a-z0-9-]+$")
 DATE_VALUE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 SCALAR_LINE = re.compile(r"^[A-Za-z0-9_-]+:\s*.*$")
 SOURCE_ROW = re.compile(r"^\|\s*S\d+\s*\|", re.MULTILINE)
+# Extracts markdown URLs: [text](url)
+# Updated regex to handle optional titles in markdown links correctly, e.g. [text](url "title")
+MD_URL = re.compile(r"\[([^\]]+)\]\((https?://[^)\s]+)[^)]*\)")
 
 
 def split_frontmatter(path: Path) -> tuple[dict[str, str], str]:
@@ -63,7 +69,7 @@ def split_frontmatter(path: Path) -> tuple[dict[str, str], str]:
         raise ValueError("missing YAML frontmatter end")
 
     raw_fm = text[4:end]
-    body = text[end + 5 :]
+    body = text[end + 5:]
 
     data: dict[str, str] = {}
     for idx, line in enumerate(raw_fm.splitlines(), start=1):
@@ -90,7 +96,48 @@ def is_blank(value: str | None) -> bool:
     return value is None or value.strip() == ""
 
 
-def validate_campaign(campaign_dir: Path) -> list[str]:
+def check_url(url: str, timeout: int = 8) -> tuple[bool, str]:
+    """Return (ok, reason). Uses HEAD, falls back to GET on 405."""
+    headers = {"User-Agent": "research-loop-validator/1.0"}
+    for method in ("HEAD", "GET"):
+        try:
+            req = urllib.request.Request(url, headers=headers, method=method)
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                return True, str(resp.status)
+        except urllib.error.HTTPError as e:
+            if e.code == 405 and method == "HEAD":
+                continue  # retry with GET
+            return False, f"HTTP {e.code}"
+        except urllib.error.URLError as e:
+            return False, str(e.reason)
+        except Exception as e:
+            return False, str(e)
+    return False, "HEAD and GET both failed"
+
+
+def validate_urls(sources_path: Path) -> list[str]:
+    """Extract and check all markdown URLs from sources.md."""
+    errors: list[str] = []
+    text = sources_path.read_text(encoding="utf-8")
+    urls = MD_URL.findall(text)  # list of (title, url)
+
+    if not urls:
+        return errors
+
+    print(f"  Checking {len(urls)} URL(s) in {sources_path.name}...")
+    for title, url in urls:
+        ok, reason = check_url(url)
+        status = "OK" if ok else f"FAIL ({reason})"
+        print(f"    [{status}] {title}: {url}")
+        if not ok:
+            errors.append(
+                f"{sources_path}: broken URL '{url}' (title: '{title}', reason: {reason})"
+            )
+
+    return errors
+
+
+def validate_campaign(campaign_dir: Path, check_urls: bool = False) -> list[str]:
     errors: list[str] = []
     content: dict[str, tuple[dict[str, str], str]] = {}
 
@@ -175,32 +222,47 @@ def validate_campaign(campaign_dir: Path) -> list[str]:
                     f"{campaign_dir / 'experiment.md'}: closed run cannot keep experiment status 'not_started'"
                 )
 
+    # URL check — only when sources.md status is completed
+    if check_urls:
+        sources_fm = content.get("sources.md", ({}, ""))[0]
+        if sources_fm.get("status") == "completed":
+            sources_path = campaign_dir / "sources.md"
+            if sources_path.exists():
+                errors.extend(validate_urls(sources_path))
+
     return errors
 
 
 def main() -> int:
-    if len(sys.argv) != 2:
-        print("Usage: python scripts/validate_campaign.py <campaigns_dir>")
+    args = sys.argv[1:]
+    check_urls = "--check-urls" in args
+    positional = [a for a in args if not a.startswith("--")]
+
+    if len(positional) != 1:
+        print("Usage: python scripts/validate_campaign.py <campaigns_dir> [--check-urls]")
         return 2
 
-    root = Path(sys.argv[1]).resolve()
+    root = Path(positional[0]).resolve()
     if not root.exists() or not root.is_dir():
         print(f"Error: campaigns directory not found: {root}")
         return 2
+
+    if check_urls:
+        print("URL checking enabled.\n")
 
     all_errors: list[str] = []
     for child in sorted(root.iterdir()):
         if not child.is_dir() or child.name.startswith("_"):
             continue
-        all_errors.extend(validate_campaign(child))
+        all_errors.extend(validate_campaign(child, check_urls=check_urls))
 
     if all_errors:
-        print("Validation failed:")
+        print("\nValidation failed:")
         for err in all_errors:
             print(f"- {err}")
         return 1
 
-    print("Validation passed: all campaigns are structurally and semantically valid.")
+    print("\nValidation passed: all campaigns are structurally and semantically valid.")
     return 0
 
 
