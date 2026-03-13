@@ -54,10 +54,8 @@ REQUIRED_FIELDS = {
 DATE_TOPIC = re.compile(r"^\d{4}-\d{2}-\d{2}-[a-z0-9-]+$")
 DATE_VALUE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 SCALAR_LINE = re.compile(r"^[A-Za-z0-9_-]+:\s*.*$")
-SOURCE_ROW = re.compile(r"^\|\s*S\d+\s*\|", re.MULTILINE)
-# Extracts markdown URLs: [text](url)
-# Updated regex to handle optional titles in markdown links correctly, e.g. [text](url "title")
-MD_URL = re.compile(r"\[([^\]]+)\]\((https?://[^)\s]+)[^)]*\)")
+TABLE_ROW = re.compile(r"^\|(?P<row>.+)\|\s*$")
+LIST_ROW = re.compile(r"^\s*(?:[-*+]\s+|\d+[.)]\s+)(?P<row>.+)$")
 
 
 def split_frontmatter(path: Path) -> tuple[dict[str, str], str]:
@@ -96,48 +94,50 @@ def is_blank(value: str | None) -> bool:
     return value is None or value.strip() == ""
 
 
-def check_url(url: str, timeout: int = 8) -> tuple[bool, str]:
-    """Return (ok, reason). Uses HEAD, falls back to GET on 405."""
-    headers = {"User-Agent": "research-loop-validator/1.0"}
-    for method in ("HEAD", "GET"):
-        try:
-            req = urllib.request.Request(url, headers=headers, method=method)
-            with urllib.request.urlopen(req, timeout=timeout) as resp:
-                return True, str(resp.status)
-        except urllib.error.HTTPError as e:
-            if e.code == 405 and method == "HEAD":
-                continue  # retry with GET
-            return False, f"HTTP {e.code}"
-        except urllib.error.URLError as e:
-            return False, str(e.reason)
-        except Exception as e:
-            return False, str(e)
-    return False, "HEAD and GET both failed"
+def resolve_ref_path(ref: str, campaign_dir: Path) -> Path | None:
+    candidate = Path(ref.strip())
+    if candidate.is_absolute():
+        return candidate if candidate.exists() else None
+
+    checked: set[Path] = set()
+    roots = [campaign_dir, Path.cwd(), *campaign_dir.parents]
+    for root in roots:
+        resolved = (root / candidate).resolve()
+        if resolved in checked:
+            continue
+        checked.add(resolved)
+        if resolved.exists():
+            return resolved
+
+    return None
 
 
-def validate_urls(sources_path: Path) -> list[str]:
-    """Extract and check all markdown URLs from sources.md."""
-    errors: list[str] = []
-    text = sources_path.read_text(encoding="utf-8")
-    urls = MD_URL.findall(text)  # list of (title, url)
+def count_source_entries(sources_body: str) -> int:
+    entries: set[str] = set()
+    for raw_line in sources_body.splitlines():
+        line = raw_line.strip()
+        if not line:
+            continue
 
-    if not urls:
-        return errors
+        table_match = TABLE_ROW.match(line)
+        if table_match:
+            cells = [cell.strip() for cell in table_match.group("row").split("|")]
+            first_cell = cells[0].lower() if cells else ""
+            if first_cell in {"id", "---", ":---", "---:"}:
+                continue
+            if all(set(cell) <= {":", "-"} for cell in cells):
+                continue
+            entries.add(line)
+            continue
 
-    print(f"  Checking {len(urls)} URL(s) in {sources_path.name}...")
-    for title, url in urls:
-        ok, reason = check_url(url)
-        status = "OK" if ok else f"FAIL ({reason})"
-        print(f"    [{status}] {title}: {url}")
-        if not ok:
-            errors.append(
-                f"{sources_path}: broken URL '{url}' (title: '{title}', reason: {reason})"
-            )
+        list_match = LIST_ROW.match(line)
+        if list_match:
+            entries.add(list_match.group("row").strip())
 
-    return errors
+    return len(entries)
 
 
-def validate_campaign(campaign_dir: Path, check_urls: bool = False) -> list[str]:
+def validate_campaign(campaign_dir: Path) -> list[str]:
     errors: list[str] = []
     content: dict[str, tuple[dict[str, str], str]] = {}
 
@@ -211,13 +211,26 @@ def validate_campaign(campaign_dir: Path, check_urls: bool = False) -> list[str]
                 f"{campaign_dir / 'decision.md'}: outcome=rejected requires non-empty 'rejection_ref'"
             )
 
+        for ref_field in ("proposal_ref", "experiment_ref"):
+            ref_value = decision_fm.get(ref_field)
+            if is_blank(ref_value):
+                errors.append(
+                    f"{campaign_dir / 'decision.md'}: requires non-empty '{ref_field}'"
+                )
+                continue
+
+            if resolve_ref_path(ref_value or "", campaign_dir) is None:
+                errors.append(
+                    f"{campaign_dir / 'decision.md'}: '{ref_field}' path not found: {ref_value}"
+                )
+
         if decision_fm.get("status") == "closed":
             if re.search(r"^##\s*Baseline\s*\n\s*TBD\s*$", experiment_body, flags=re.MULTILINE):
                 errors.append(
                     f"{campaign_dir / 'experiment.md'}: closed run requires non-TBD baseline"
                 )
 
-            source_count = len(SOURCE_ROW.findall(sources_body))
+            source_count = count_source_entries(sources_body)
             if source_count < 3:
                 errors.append(
                     f"{campaign_dir / 'sources.md'}: closed run requires at least 3 source entries"
