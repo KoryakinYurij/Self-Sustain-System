@@ -3,12 +3,15 @@
 
 Usage:
   python scripts/validate_campaign.py modules/research-loop/campaigns
+  python scripts/validate_campaign.py modules/research-loop/campaigns --check-urls
 """
 
 from __future__ import annotations
 
 import re
 import sys
+import urllib.request
+import urllib.error
 from pathlib import Path
 
 REQUIRED_FILES = [
@@ -64,7 +67,7 @@ def split_frontmatter(path: Path) -> tuple[dict[str, str], str]:
         raise ValueError("missing YAML frontmatter end")
 
     raw_fm = text[4:end]
-    body = text[end + 5 :]
+    body = text[end + 5:]
 
     data: dict[str, str] = {}
     for idx, line in enumerate(raw_fm.splitlines(), start=1):
@@ -182,9 +185,15 @@ def validate_campaign(campaign_dir: Path) -> list[str]:
     if not artifacts.exists() or not artifacts.is_dir():
         errors.append(f"{campaign_dir}: missing artifacts/ directory")
 
-    decision_fm = content.get("decision.md", ({}, ""))[0]
-    experiment_fm, experiment_body = content.get("experiment.md", ({}, ""))
-    sources_body = content.get("sources.md", ({}, ""))[1]
+    decision_data = content.get("decision.md")
+    decision_fm = decision_data[0] if decision_data else {}
+    
+    experiment_data = content.get("experiment.md")
+    experiment_fm = experiment_data[0] if experiment_data else {}
+    experiment_body = experiment_data[1] if experiment_data else ""
+    
+    sources_data = content.get("sources.md")
+    sources_body = sources_data[1] if sources_data else ""
 
     if decision_fm:
         if decision_fm.get("status") == "closed" and decision_fm.get("outcome") == "pending":
@@ -232,32 +241,47 @@ def validate_campaign(campaign_dir: Path) -> list[str]:
                     f"{campaign_dir / 'experiment.md'}: closed run cannot keep experiment status 'not_started'"
                 )
 
+    if check_urls:
+        sources_data = content.get("sources.md")
+        sources_fm = sources_data[0] if sources_data else {}
+        if sources_fm.get("status") == "completed":
+            sources_path = campaign_dir / "sources.md"
+            if sources_path.exists():
+                errors.extend(validate_urls(sources_path))
+
     return errors
 
 
 def main() -> int:
-    if len(sys.argv) != 2:
-        print("Usage: python scripts/validate_campaign.py <campaigns_dir>")
+    args = sys.argv[1:]
+    check_urls = "--check-urls" in args
+    positional = [a for a in args if not a.startswith("--")]
+
+    if len(positional) != 1:
+        print("Usage: python scripts/validate_campaign.py <campaigns_dir> [--check-urls]")
         return 2
 
-    root = Path(sys.argv[1]).resolve()
+    root = Path(positional[0]).resolve()
     if not root.exists() or not root.is_dir():
         print(f"Error: campaigns directory not found: {root}")
         return 2
+
+    if check_urls:
+        print("URL checking enabled.\n")
 
     all_errors: list[str] = []
     for child in sorted(root.iterdir()):
         if not child.is_dir() or child.name.startswith("_"):
             continue
-        all_errors.extend(validate_campaign(child))
+        all_errors.extend(validate_campaign(child, check_urls=check_urls))
 
     if all_errors:
-        print("Validation failed:")
+        print("\nValidation failed:")
         for err in all_errors:
             print(f"- {err}")
         return 1
 
-    print("Validation passed: all campaigns are structurally and semantically valid.")
+    print("\nValidation passed: all campaigns are structurally and semantically valid.")
     return 0
 
 
