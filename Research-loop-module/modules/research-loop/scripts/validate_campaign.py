@@ -185,9 +185,15 @@ def validate_campaign(campaign_dir: Path, check_urls: bool = False) -> list[str]
     if not artifacts.exists() or not artifacts.is_dir():
         errors.append(f"{campaign_dir}: missing artifacts/ directory")
 
-    decision_fm = content.get("decision.md", ({}, ""))[0]
-    experiment_fm, experiment_body = content.get("experiment.md", ({}, ""))
-    sources_body = content.get("sources.md", ({}, ""))[1]
+    decision_data = content.get("decision.md")
+    decision_fm = decision_data[0] if decision_data else {}
+    
+    experiment_data = content.get("experiment.md")
+    experiment_fm = experiment_data[0] if experiment_data else {}
+    experiment_body = experiment_data[1] if experiment_data else ""
+    
+    sources_data = content.get("sources.md")
+    sources_body = sources_data[1] if sources_data else ""
 
     if decision_fm:
         if decision_fm.get("status") == "closed" and decision_fm.get("outcome") == "pending":
@@ -222,9 +228,9 @@ def validate_campaign(campaign_dir: Path, check_urls: bool = False) -> list[str]
                     f"{campaign_dir / 'experiment.md'}: closed run cannot keep experiment status 'not_started'"
                 )
 
-    # URL check — only when sources.md status is completed
     if check_urls:
-        sources_fm = content.get("sources.md", ({}, ""))[0]
+        sources_data = content.get("sources.md")
+        sources_fm = sources_data[0] if sources_data else {}
         if sources_fm.get("status") == "completed":
             sources_path = campaign_dir / "sources.md"
             if sources_path.exists():
