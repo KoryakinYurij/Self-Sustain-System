@@ -1,0 +1,8 @@
+**Critique:**
+
+1. **Specificity**: Proposal is specific — adds "repo map" as explicit grounding pattern.
+2. **Observable effect**: "Fewer vague instructions" and "reduced CLI steps" are measurable but lack baseline metrics.
+3. **Baseline**: Concrete — current README lacks explicit repo map mention.
+4. **Test cases**: Case 1/2 detect improvement; Case 3 detects regression. All relevant but lack pass/fail criteria.
+5. **Minimal/reversible**: Yes — single pattern addition, easily removable.
+6. **Gap**: No quantitative threshold (e.g., "reduce steps by X%") to declare success.
