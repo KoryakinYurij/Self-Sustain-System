@@ -21,8 +21,8 @@
 - Для `plan.md` дополнительно обязательно `created_at`.
 - Для `decision.md` дополнительно обязательны:
   - `outcome`
-  - `proposal_ref`
-  - `experiment_ref`
+  - `proposal_ref` (непустой, путь должен существовать)
+  - `experiment_ref` (непустой, путь должен существовать)
 
 ## Enumerations
 
@@ -51,7 +51,7 @@
 - Если `decision.outcome = accepted`, поле `promotion_ref` обязательно и не может быть пустым.
 - Если `decision.outcome = rejected`, поле `rejection_ref` обязательно и не может быть пустым.
 - Если run закрыт (`decision.status = closed`), в `experiment.md` baseline не может быть `TBD`.
-- Если run закрыт (`decision.status = closed`), в `sources.md` должно быть минимум 3 source entry.
+- Если run закрыт (`decision.status = closed`), в `sources.md` должно быть минимум 3 source entry (поддерживаются markdown-таблица и markdown-список, а не только шаблон `| S1 | ...`).
 
 ## Naming convention
 

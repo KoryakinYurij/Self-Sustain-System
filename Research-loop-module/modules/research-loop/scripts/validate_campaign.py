@@ -51,7 +51,8 @@ REQUIRED_FIELDS = {
 DATE_TOPIC = re.compile(r"^\d{4}-\d{2}-\d{2}-[a-z0-9-]+$")
 DATE_VALUE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 SCALAR_LINE = re.compile(r"^[A-Za-z0-9_-]+:\s*.*$")
-SOURCE_ROW = re.compile(r"^\|\s*S\d+\s*\|", re.MULTILINE)
+TABLE_ROW = re.compile(r"^\|(?P<row>.+)\|\s*$")
+LIST_ROW = re.compile(r"^\s*(?:[-*+]\s+|\d+[.)]\s+)(?P<row>.+)$")
 
 
 def split_frontmatter(path: Path) -> tuple[dict[str, str], str]:
@@ -88,6 +89,49 @@ def split_frontmatter(path: Path) -> tuple[dict[str, str], str]:
 
 def is_blank(value: str | None) -> bool:
     return value is None or value.strip() == ""
+
+
+def resolve_ref_path(ref: str, campaign_dir: Path) -> Path | None:
+    candidate = Path(ref.strip())
+    if candidate.is_absolute():
+        return candidate if candidate.exists() else None
+
+    checked: set[Path] = set()
+    roots = [campaign_dir, Path.cwd(), *campaign_dir.parents]
+    for root in roots:
+        resolved = (root / candidate).resolve()
+        if resolved in checked:
+            continue
+        checked.add(resolved)
+        if resolved.exists():
+            return resolved
+
+    return None
+
+
+def count_source_entries(sources_body: str) -> int:
+    entries: set[str] = set()
+    for raw_line in sources_body.splitlines():
+        line = raw_line.strip()
+        if not line:
+            continue
+
+        table_match = TABLE_ROW.match(line)
+        if table_match:
+            cells = [cell.strip() for cell in table_match.group("row").split("|")]
+            first_cell = cells[0].lower() if cells else ""
+            if first_cell in {"id", "---", ":---", "---:"}:
+                continue
+            if all(set(cell) <= {":", "-"} for cell in cells):
+                continue
+            entries.add(line)
+            continue
+
+        list_match = LIST_ROW.match(line)
+        if list_match:
+            entries.add(list_match.group("row").strip())
+
+    return len(entries)
 
 
 def validate_campaign(campaign_dir: Path) -> list[str]:
@@ -158,13 +202,26 @@ def validate_campaign(campaign_dir: Path) -> list[str]:
                 f"{campaign_dir / 'decision.md'}: outcome=rejected requires non-empty 'rejection_ref'"
             )
 
+        for ref_field in ("proposal_ref", "experiment_ref"):
+            ref_value = decision_fm.get(ref_field)
+            if is_blank(ref_value):
+                errors.append(
+                    f"{campaign_dir / 'decision.md'}: requires non-empty '{ref_field}'"
+                )
+                continue
+
+            if resolve_ref_path(ref_value or "", campaign_dir) is None:
+                errors.append(
+                    f"{campaign_dir / 'decision.md'}: '{ref_field}' path not found: {ref_value}"
+                )
+
         if decision_fm.get("status") == "closed":
             if re.search(r"^##\s*Baseline\s*\n\s*TBD\s*$", experiment_body, flags=re.MULTILINE):
                 errors.append(
                     f"{campaign_dir / 'experiment.md'}: closed run requires non-TBD baseline"
                 )
 
-            source_count = len(SOURCE_ROW.findall(sources_body))
+            source_count = count_source_entries(sources_body)
             if source_count < 3:
                 errors.append(
                     f"{campaign_dir / 'sources.md'}: closed run requires at least 3 source entries"
